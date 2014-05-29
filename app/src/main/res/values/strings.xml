@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Fog of the World</string>
+    <string name="title_activity_fog">Fog of the World</string>
+
+    <!-- Generic -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cancel">Cancel</string>
+    <string name="okay">Okay</string>
+
+    <!-- Menu titles -->
+    <string name="dev_menu_refresh_title">Refresh Map</string>
+    <string name="dev_menu_wipe_title">Wipe Database</string>
+    <string name="dev_menu_data_title">Data</string>
+
+    <!-- Are You Sure? -->
+    <string name="are_you_sure_title">Are you sure?</string>
+    <string name="are_you_sure_subtitle">Slide the slider to full to confirm</string>
+
+    <!-- Data Dialog -->
+    <string name="data_title">Statistics</string>
+
+</resources>

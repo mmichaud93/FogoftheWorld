@@ -1,0 +1,28 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<fragment
+    android:id="@+id/map"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.google.android.gms.maps.MapFragment"
+    android:name="com.google.android.gms.maps.MapFragment"/>
+    <!--<com.tallmatt.fogoftheworld.app.FogMask
+        android:id="@+id/fog_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />-->
+   <!-- <ImageView
+        android:id="@+id/preview"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"/>-->
+</RelativeLayout>
+<!--
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.tallmatt.fogoftheworld.app.ui.FogFragment"
+        android:name="com.tallmatt.fogoftheworld.app.ui.FogFragment"/>-->

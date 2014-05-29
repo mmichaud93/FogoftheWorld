@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp"
+        android:text="@string/are_you_sure_title"
+        android:textColor="@color/black"
+        android:textSize="24sp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/are_you_sure_subtitle"
+        android:textColor="@color/black"
+        android:textSize="14sp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_margin="8dp"
+        android:background="@color/gray"/>
+
+    <SeekBar
+        android:id="@+id/are_you_sure_seek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:indeterminate="false" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:orientation="horizontal"
+        android:background="@color/gray"
+        android:paddingTop="2dp">
+
+        <Button
+            android:id="@+id/are_you_sure_no_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:layout_marginRight="1dp"
+            android:text="@string/no"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+
+        <Button
+            android:id="@+id/are_you_sure_yes_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:layout_marginLeft="1dp"
+            android:enabled="false"
+            android:text="@string/yes"
+            android:textSize="16sp"
+            android:textColor="@color/gray"/>
+
+    </LinearLayout>
+</LinearLayout>
