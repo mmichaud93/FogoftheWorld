@@ -30,8 +30,6 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_ENTRIES);
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // This database is only a cache for online data, so its upgrade policy is
-        // to simply to discard the data and start over
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }
@@ -57,6 +55,19 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
         values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
+
+        // Insert the new row, returning the primary key value of the new row
+        db.insert(
+                LatLngPointsContract.PointEntry.TABLE_NAME,
+                "null",
+                values);
+    }
+    public void storeSinglePoint(SQLiteDatabase db, LatLng point, long time) {
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
+        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
+        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_TIME, time);
 
         // Insert the new row, returning the primary key value of the new row
         db.insert(
@@ -97,24 +108,46 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
                 null                                 // The sort order
         );
         ArrayList<LatLng> points = new ArrayList<LatLng>();
-        //Log.d("TM", "c count: "+c.getCount());
         if(c.moveToFirst()) {
             do {
                 points.add(new LatLng(c.getFloat(0), c.getFloat(1)));
-                //Log.d("TM", c.getPosition()+": ("+c.getFloat(0)+", "+c.getFloat(1)+")");
             } while(c.moveToNext());
         }
         return points;
     }
+    public ArrayList<Long> getTimes(SQLiteDatabase db) {
+        String[] projection = {
+                LatLngPointsContract.PointEntry.COLUMN_NAME_TIME
+        };
+
+        Cursor c = db.query(
+                LatLngPointsContract.PointEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                null,                                // The columns for the WHERE clause
+                null,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                 // The sort order
+        );
+        ArrayList<Long> times = new ArrayList<Long>();
+        if(c.moveToFirst()) {
+            do {
+                times.add(new Long(c.getLong(0)));
+            } while(c.moveToNext());
+        }
+        return times;
+    }
     private static final String TEXT_TYPE = " TEXT";
     private static final String FLOAT_TYPE = " FLOAT";
+    private static final String LONG_TYPE = " LONG";
     private static final String COMMA_SEP = ",";
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + LatLngPointsContract.PointEntry.TABLE_NAME + " (" +
                     LatLngPointsContract.PointEntry._ID + " INTEGER PRIMARY KEY," +
                     LatLngPointsContract.PointEntry.COLUMN_NAME_LAT + FLOAT_TYPE + COMMA_SEP +
                     LatLngPointsContract.PointEntry.COLUMN_NAME_LNG + FLOAT_TYPE + COMMA_SEP +
-                    LatLngPointsContract.PointEntry.COLUMN_NAME_ACC + FLOAT_TYPE +
+                    LatLngPointsContract.PointEntry.COLUMN_NAME_ACC + FLOAT_TYPE + COMMA_SEP +
+                    LatLngPointsContract.PointEntry.COLUMN_NAME_TIME + LONG_TYPE +
                     " )";
 
     private static final String SQL_DELETE_ENTRIES =

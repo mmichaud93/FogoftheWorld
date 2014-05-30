@@ -51,7 +51,7 @@ public class MaskTileProvider implements TileProvider {
 
     int bitmapWidth = 256;
     int bitmapHeight = 256;
-    public static final double radiusConstant = 0.0003423902130126953;
+    public static final double radiusConstant = 0.0003;//423902130126953;
 
 //    int width = 180/4;
 //    int height = 180/4;

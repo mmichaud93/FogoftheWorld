@@ -49,6 +49,7 @@ import com.tallmatt.fogoftheworld.app.storage.LatLngPointsDBHelper;
 import com.tallmatt.fogoftheworld.app.ui.utility.AreYouSureDialogFragment;
 import com.tallmatt.fogoftheworld.app.ui.utility.DataDialogFragment;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -62,6 +63,7 @@ public class FogActivity extends FragmentActivity {
     ArrayList<LatLng> points = new ArrayList<LatLng>();
     LatLngPointsDBHelper mDbHelper;
     private ServiceConnection mConnection;
+    LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +88,17 @@ public class FogActivity extends FragmentActivity {
         };
         /* bind the service, this lets us listen for location updates when the app is in the background */
         bindService(new Intent(this, LocationUpdateService.class), mConnection, Context.BIND_AUTO_CREATE);
+
+        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, GPSListener);
+            Log.d("TM", "Update Service Created with GPS");
+        }
+        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, networkListener);
+            Log.d("TM", "Update Service Created with Network");
+        }
 
         setUpMapIfNeeded();
     }
@@ -164,33 +177,89 @@ public class FogActivity extends FragmentActivity {
         // Add the tile overlay to the map.
         overlay = mMap.addTileOverlay(opts);
         /* updater for when the app is in the forefront, this should stop working when the app goes to the back */
-        mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                if (location != null) {
-                    for(LatLng point: points) {
-                        if(Math.abs(point.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
-                           Math.abs(point.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
-                            return;
-                        }
-                    }
-                    points.add(new LatLng(location.getLatitude(), location.getLongitude()));
-                    mDbHelper.storeSinglePoint(mDbHelper.getWritableDatabase(), points.get(points.size()-1));
-                    tileProvider.setPoints(points);
-                }
-            }
-        });
+//        mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+//            @Override
+//            public void onMyLocationChange(Location location) {
+//                if (location != null) {
+//                    for(LatLng point: points) {
+//                        if(Math.abs(point.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
+//                           Math.abs(point.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
+//                            return;
+//                        }
+//                    }
+//                    points.add(new LatLng(location.getLatitude(), location.getLongitude()));
+//                    mDbHelper.storeSinglePoint(mDbHelper.getWritableDatabase(), points.get(points.size()-1));
+//                    tileProvider.setPoints(points);
+//                }
+//            }
+//        });
     }
 
     @Override
     public void onStop(){
         super.onStop();
+        Log.d("TM", "GPS listener shut down");
+        locationManager.removeUpdates(GPSListener);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d("TM", "Network listener shut down");
+        locationManager.removeUpdates(networkListener);
         mDbHelper.close();
         getBaseContext().unbindService(mConnection);
+    }
+
+    LocationListener GPSListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            onLocationGet(location);
+        }
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+        @Override
+        public void onProviderEnabled(String provider) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, this);
+        }
+        @Override
+        public void onProviderDisabled(String provider) {
+            locationManager.removeUpdates(this);
+        }
+    };
+
+    LocationListener networkListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            onLocationGet(location);
+        }
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+        @Override
+        public void onProviderEnabled(String provider) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, this);
+        }
+        @Override
+        public void onProviderDisabled(String provider) {
+            locationManager.removeUpdates(this);
+        }
+    };
+
+    public void onLocationGet(Location location) {
+        if (location != null) {
+            for(LatLng point: points) {
+                if(Math.abs(point.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
+                        Math.abs(point.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
+                    return;
+                }
+            }
+            points.add(new LatLng(location.getLatitude(), location.getLongitude()));
+            mDbHelper.storeSinglePoint(mDbHelper.getWritableDatabase(), points.get(points.size()-1), System.currentTimeMillis());
+            tileProvider.setPoints(points);
+        }
     }
 }

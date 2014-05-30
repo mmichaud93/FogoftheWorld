@@ -8,7 +8,10 @@ import android.location.Criteria;
 public class FogConstants {
     public static final String LOCATION_UPDATE_SERVICE_ACTION = "LOCATION_GET";
     public static final String LOCATION_UPDATE_SERVICE_LOCATION = "LOCATION";
-    public static final double LOCATION_IDENTICAL_THRESHOLD = 0.000125;
+    public static final double LOCATION_IDENTICAL_THRESHOLD = 0.00025;
+
+    public static final long LOCATION_UPDATE_TIME = 15000;
+    public static final float LOCATION_UPDATE_DISTANCE = 25;
 
     /** this criteria needs high accuracy, high power, and cost */
     public static Criteria createHighCriteria() {

@@ -16,5 +16,6 @@ public final class LatLngPointsContract {
         public static final String COLUMN_NAME_LAT = "lat";
         public static final String COLUMN_NAME_LNG = "lng";
         public static final String COLUMN_NAME_ACC = "accuracy";
+        public static final String COLUMN_NAME_TIME = "time";
     }
 }

@@ -19,9 +19,6 @@ public class LocationUpdateService extends Service {
 
     LocationManager locationManager;
 
-    long locationUpdateTime = 15000;
-    float locationUpdateDistance = 15;
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -34,65 +31,13 @@ public class LocationUpdateService extends Service {
        // locationManager.requestLocationUpdates(locationUpdateTime, locationUpdateDistance, FogConstants.createHighCriteria(), GPSListener, null);
 
         /* might work with these disabled, ill have to test it more */
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, locationUpdateTime, locationUpdateDistance, GPSListener);
-            Log.d("TM", "Update Service Created with GPS");
-        }
-        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, locationUpdateTime, locationUpdateDistance, networkListener);
-            Log.d("TM", "Update Service Created with Network");
-        }
         if(locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, locationUpdateTime, locationUpdateDistance, passiveListener);
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, passiveListener);
             Log.d("TM", "Update Service Created with Passive");
         }
 
         super.onCreate();
     }
-
-    LocationListener GPSListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            registerLocationChange(location);
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, locationUpdateTime, locationUpdateDistance, this);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            locationManager.removeUpdates(this);
-        }
-    };
-
-    LocationListener networkListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            registerLocationChange(location);
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, locationUpdateTime, locationUpdateDistance, this);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            locationManager.removeUpdates(this);
-        }
-    };
 
     LocationListener passiveListener = new LocationListener() {
         @Override
@@ -107,7 +52,7 @@ public class LocationUpdateService extends Service {
 
         @Override
         public void onProviderEnabled(String provider) {
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, locationUpdateTime, locationUpdateDistance, this);
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, this);
         }
 
         @Override
@@ -124,12 +69,9 @@ public class LocationUpdateService extends Service {
         sendBroadcast(intent);
     }
 
-
     @Override
     public void onDestroy() {
         Log.d("TM", "Update Service Destroyed");
-        locationManager.removeUpdates(GPSListener);
-        locationManager.removeUpdates(networkListener);
         locationManager.removeUpdates(passiveListener);
     }
 }
