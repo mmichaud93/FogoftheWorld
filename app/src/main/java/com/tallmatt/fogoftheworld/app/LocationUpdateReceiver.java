@@ -32,16 +32,18 @@ public class LocationUpdateReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.hasExtra(FogConstants.LOCATION_UPDATE_SERVICE_LOCATION)) {
             Location location = (Location)intent.getExtras().get(FogConstants.LOCATION_UPDATE_SERVICE_LOCATION);
-            Log.d("TM", "Location got from update service");
             LatLngPointsDBHelper mDbHelper = new LatLngPointsDBHelper(context);
-            ArrayList<LatLng> points = mDbHelper.getPoints(mDbHelper.getReadableDatabase());
-            for(LatLng point: points) {
-                if(Math.abs(point.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
-                        Math.abs(point.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
+            ArrayList<PointLatLng> points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
+            for(PointLatLng point: points) {
+                if(Math.abs(point.latLng.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
+                        Math.abs(point.latLng.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
                     return;
                 }
             }
-            mDbHelper.storeSinglePoint(mDbHelper.getWritableDatabase(), new LatLng(location.getLatitude(), location.getLongitude()));
+            mDbHelper.storeSinglePointLatLng(mDbHelper.getWritableDatabase(), new PointLatLng(
+                    new LatLng(location.getLatitude(), location.getLongitude()), System.currentTimeMillis(), FogConstants.SOURCE_PASSIVE));
+            FogActivity.lastLatLng = new PointLatLng(
+                    new LatLng(location.getLatitude(), location.getLongitude()), System.currentTimeMillis(), FogConstants.SOURCE_PASSIVE);
             mDbHelper.close();
         }
     }

@@ -42,6 +42,7 @@ public class LocationUpdateService extends Service {
     LocationListener passiveListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
+            Log.d("TM", "Passive location received");
             registerLocationChange(location);
         }
 
@@ -62,7 +63,7 @@ public class LocationUpdateService extends Service {
     };
 
     public void registerLocationChange(Location location) {
-        Log.d("TM", "location changed ("+location.getLatitude()+", "+location.getLongitude()+")");
+        //Log.d("TM", "location changed ("+location.getLatitude()+", "+location.getLongitude()+")");
         Intent intent = new Intent();
         intent.setAction(FogConstants.LOCATION_UPDATE_SERVICE_ACTION);
         intent.putExtra(FogConstants.LOCATION_UPDATE_SERVICE_LOCATION, location);

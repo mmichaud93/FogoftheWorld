@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.ActionMode;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.tallmatt.fogoftheworld.app.PointLatLng;
 
 import java.util.ArrayList;
 
@@ -39,12 +40,12 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
     public void dropTable(SQLiteDatabase db) {
         db.execSQL(SQL_DELETE_ENTRIES);
     }
-    public void storePoints(SQLiteDatabase db, ArrayList<LatLng> points) {
+    public void storePoints(SQLiteDatabase db, ArrayList<PointLatLng> points) {
         dropTable(db);
         db.execSQL(SQL_CREATE_ENTRIES);
-        Log.d("TM", "saving "+points.size()+" points");
-        for(LatLng point : points) {
-            storeSinglePoint(db, point);
+        Log.d("TM", "saving " + points.size() + " points");
+        for(PointLatLng point : points) {
+            storeSinglePointLatLng(db, point);
         }
     }
     interface StoreSinglePointCallback {
@@ -87,6 +88,51 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
                 "null",
                 values);
         callback.complete();
+    }
+    public void storeSinglePointLatLng(SQLiteDatabase db, PointLatLng point) {
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LAT, point.latLng.latitude);
+        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LNG, point.latLng.longitude);
+        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_TIME, point.time);
+        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_SRC, point.source);
+
+        // Insert the new row, returning the primary key value of the new row
+        db.insert(
+                LatLngPointsContract.PointEntry.TABLE_NAME,
+                "null",
+                values);
+    }
+    public ArrayList<PointLatLng> getPointLatLngs(SQLiteDatabase db) {
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+                LatLngPointsContract.PointEntry.COLUMN_NAME_LAT,
+                LatLngPointsContract.PointEntry.COLUMN_NAME_LNG,
+                LatLngPointsContract.PointEntry.COLUMN_NAME_TIME,
+                LatLngPointsContract.PointEntry.COLUMN_NAME_SRC
+        };
+
+        // How you want the results sorted in the resulting Cursor
+
+        Cursor c = db.query(
+                LatLngPointsContract.PointEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                null,                                // The columns for the WHERE clause
+                null,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                 // The sort order
+        );
+        ArrayList<PointLatLng> points = new ArrayList<PointLatLng>();
+        if(c.moveToFirst()) {
+            do {
+                points.add(new PointLatLng(
+                        new LatLng(c.getFloat(0), c.getFloat(1)),
+                        c.getLong(2), c.getString(3)));
+            } while(c.moveToNext());
+        }
+        return points;
     }
     public ArrayList<LatLng> getPoints(SQLiteDatabase db) {
         // Define a projection that specifies which columns from the database
@@ -137,6 +183,28 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
         }
         return times;
     }
+    public ArrayList<String> getSources(SQLiteDatabase db) {
+        String[] projection = {
+                LatLngPointsContract.PointEntry.COLUMN_NAME_SRC
+        };
+
+        Cursor c = db.query(
+                LatLngPointsContract.PointEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                null,                                // The columns for the WHERE clause
+                null,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                 // The sort order
+        );
+        ArrayList<String> times = new ArrayList<String>();
+        if(c.moveToFirst()) {
+            do {
+                times.add(c.getString(0));
+            } while(c.moveToNext());
+        }
+        return times;
+    }
     private static final String TEXT_TYPE = " TEXT";
     private static final String FLOAT_TYPE = " FLOAT";
     private static final String LONG_TYPE = " LONG";
@@ -147,7 +215,8 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
                     LatLngPointsContract.PointEntry.COLUMN_NAME_LAT + FLOAT_TYPE + COMMA_SEP +
                     LatLngPointsContract.PointEntry.COLUMN_NAME_LNG + FLOAT_TYPE + COMMA_SEP +
                     LatLngPointsContract.PointEntry.COLUMN_NAME_ACC + FLOAT_TYPE + COMMA_SEP +
-                    LatLngPointsContract.PointEntry.COLUMN_NAME_TIME + LONG_TYPE +
+                    LatLngPointsContract.PointEntry.COLUMN_NAME_TIME + LONG_TYPE + COMMA_SEP +
+                    LatLngPointsContract.PointEntry.COLUMN_NAME_SRC + TEXT_TYPE +
                     " )";
 
     private static final String SQL_DELETE_ENTRIES =

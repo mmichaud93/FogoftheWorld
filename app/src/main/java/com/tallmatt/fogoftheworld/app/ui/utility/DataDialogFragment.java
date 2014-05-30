@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.tallmatt.fogoftheworld.app.MaskTileProvider;
+import com.tallmatt.fogoftheworld.app.PointLatLng;
 import com.tallmatt.fogoftheworld.app.R;
 
 import java.lang.reflect.Array;
@@ -29,9 +30,9 @@ import java.util.ArrayList;
 public class DataDialogFragment extends DialogFragment {
     private static final String POINTS_KEY = "POINTS";
 
-    ArrayList<LatLng> points;
+    ArrayList<PointLatLng> points;
 
-    public static DataDialogFragment newInstance(ArrayList<LatLng> points) {
+    public static DataDialogFragment newInstance(ArrayList<PointLatLng> points) {
         DataDialogFragment fragment = new DataDialogFragment();
 
         Bundle args = new Bundle();
@@ -45,9 +46,9 @@ public class DataDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
         if(args!=null && args.containsKey(POINTS_KEY)) {
-            points = (ArrayList<LatLng>) args.getSerializable(POINTS_KEY);
+            points = (ArrayList<PointLatLng>) args.getSerializable(POINTS_KEY);
         } else {
-            points = new ArrayList<LatLng>();
+            points = new ArrayList<PointLatLng>();
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

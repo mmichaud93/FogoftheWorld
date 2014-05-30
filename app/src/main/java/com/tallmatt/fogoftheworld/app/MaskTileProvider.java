@@ -41,7 +41,7 @@ public class MaskTileProvider implements TileProvider {
     Paint clearAwayPaint;
     Paint maskPaint;
     Paint fogPaint;
-    ArrayList<LatLng> points;
+    ArrayList<PointLatLng> points;
     Bitmap mask;
     Canvas maskCanvas;
 
@@ -51,7 +51,7 @@ public class MaskTileProvider implements TileProvider {
 
     int bitmapWidth = 256;
     int bitmapHeight = 256;
-    public static final double radiusConstant = 0.0003;//423902130126953;
+    public static final double radiusConstant = 0.0004;//423902130126953;
 
 //    int width = 180/4;
 //    int height = 180/4;
@@ -89,14 +89,14 @@ public class MaskTileProvider implements TileProvider {
 
         // the mask/result canvas and bitmap are global variables to save on some memory, thus we have
         // to lock out some tiles so that only one is being created at a time
-        points = new ArrayList<LatLng>();
+        points = new ArrayList<PointLatLng>();
 
         //points.add(new LatLng(42.342969f, -71.100892f));
         //points.add(new LatLng(42.342832f, -71.100920f));
         //points.add(new LatLng(42.342645f, -71.100785f));
 
     }
-    public void setPoints(ArrayList<LatLng> points) {
+    public void setPoints(ArrayList<PointLatLng> points) {
         this.points = points;
     }
     @Override
@@ -112,21 +112,21 @@ public class MaskTileProvider implements TileProvider {
                 maskCanvas = new Canvas(mask);
                 // draw the points on the mask as black circles
                 int pointsOnTile = 0;
-                for(LatLng ll : points) {
-                    if(ll.longitude < bounds.northeast.longitude+0.01 && ll.longitude > bounds.southwest.longitude-0.01 &&
-                            ll.latitude < bounds.northeast.latitude+0.01 && ll.latitude > bounds.southwest.latitude-0.01) {//bounds.contains(ll)) {
+                for(PointLatLng ll : points) {
+                    if(ll.latLng.longitude < bounds.northeast.longitude+0.01 && ll.latLng.longitude > bounds.southwest.longitude-0.01 &&
+                            ll.latLng.latitude < bounds.northeast.latitude+0.01 && ll.latLng.latitude > bounds.southwest.latitude-0.01) {//bounds.contains(ll)) {
                         double thisTileWidth = bounds.northeast.longitude-bounds.southwest.longitude;
                         double thisTileHeight = bounds.northeast.latitude-bounds.southwest.latitude;
                         //Log.d("TM", "zoom/bitwidth = "+((float)zoom/bitmapWidth));
                         //Log.d("TM", "thisTileWidth*(zoom/bitwidth) = "+(thisTileWidth*(float)zoom/bitmapWidth));
                         float radius =  (float)(radiusConstant*(float)bitmapWidth/thisTileWidth);
                         clearAwayPaint.setShader(new RadialGradient(
-                                (float)((((ll.longitude-bounds.southwest.longitude)/thisTileWidth)*bitmapWidth)),
-                                (float)(bitmapHeight-(((ll.latitude-bounds.southwest.latitude)/thisTileHeight)*bitmapHeight)),
+                                (float)((((ll.latLng.longitude-bounds.southwest.longitude)/thisTileWidth)*bitmapWidth)),
+                                (float)(bitmapHeight-(((ll.latLng.latitude-bounds.southwest.latitude)/thisTileHeight)*bitmapHeight)),
                                 radius, Color.BLACK, Color.TRANSPARENT, Shader.TileMode.MIRROR));
                         maskCanvas.drawCircle(
-                                (float)((((ll.longitude-bounds.southwest.longitude)/thisTileWidth)*bitmapWidth)),
-                                (float)(bitmapHeight-(((ll.latitude-bounds.southwest.latitude)/thisTileHeight)*bitmapHeight)),
+                                (float)((((ll.latLng.longitude-bounds.southwest.longitude)/thisTileWidth)*bitmapWidth)),
+                                (float)(bitmapHeight-(((ll.latLng.latitude-bounds.southwest.latitude)/thisTileHeight)*bitmapHeight)),
                                 radius, clearAwayPaint);
                         pointsOnTile++;
                     }

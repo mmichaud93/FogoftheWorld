@@ -60,10 +60,12 @@ public class FogActivity extends FragmentActivity {
     private GoogleMap mMap;
     private TileOverlay overlay;
     private MaskTileProvider tileProvider;
-    ArrayList<LatLng> points = new ArrayList<LatLng>();
+    ArrayList<PointLatLng> points = new ArrayList<PointLatLng>();
     LatLngPointsDBHelper mDbHelper;
     private ServiceConnection mConnection;
     LocationManager locationManager;
+
+    public static PointLatLng lastLatLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,29 +74,11 @@ public class FogActivity extends FragmentActivity {
 
         /* load the points from the database */
         mDbHelper = new LatLngPointsDBHelper(this);
-        points = mDbHelper.getPoints(mDbHelper.getReadableDatabase());
-
-        /* launch the service */
-        mConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                Log.d("TM", "Service Connected");
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                Log.d("TM", "Service Disconnected");
-            }
-        };
-        /* bind the service, this lets us listen for location updates when the app is in the background */
-        bindService(new Intent(this, LocationUpdateService.class), mConnection, Context.BIND_AUTO_CREATE);
+        points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
+        lastLatLng = points.get(points.size()-1);
 
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, GPSListener);
-            Log.d("TM", "Update Service Created with GPS");
-        }
         if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, networkListener);
             Log.d("TM", "Update Service Created with Network");
@@ -107,7 +91,8 @@ public class FogActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
-        points = mDbHelper.getPoints(mDbHelper.getReadableDatabase());
+        points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
+        lastLatLng = points.get(points.size()-1);
         tileProvider.setPoints(points);
         overlay.clearTileCache();
     }
@@ -125,7 +110,7 @@ public class FogActivity extends FragmentActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.dev_menu_refresh:
-                points = mDbHelper.getPoints(mDbHelper.getReadableDatabase());
+                points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
                 tileProvider.setPoints(points);
                 overlay.clearTileCache();
                 return true;
@@ -165,7 +150,7 @@ public class FogActivity extends FragmentActivity {
     private void setUpMap() {
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         mMap.setMyLocationEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(points.size()-1), 14));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(points.size()-1).latLng, 14));
 
         // Create new TileOverlayOptions instance.
         tileProvider = new MaskTileProvider(mMap);
@@ -196,10 +181,37 @@ public class FogActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, GPSListener);
+            Log.d("TM", "Update Service Created with GPS");
+        }
+        if(mConnection!=null) {
+            getBaseContext().unbindService(mConnection);
+        }
+    }
+
+    @Override
     public void onStop(){
         super.onStop();
         Log.d("TM", "GPS listener shut down");
         locationManager.removeUpdates(GPSListener);
+
+        /* launch the service */
+        mConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d("TM", "Service Connected");
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d("TM", "Service Disconnected");
+            }
+        };
+        /* bind the service, this lets us listen for location updates when the app is in the background */
+        bindService(new Intent(this, LocationUpdateService.class), mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -208,13 +220,13 @@ public class FogActivity extends FragmentActivity {
         Log.d("TM", "Network listener shut down");
         locationManager.removeUpdates(networkListener);
         mDbHelper.close();
-        getBaseContext().unbindService(mConnection);
     }
 
     LocationListener GPSListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            onLocationGet(location);
+            Log.d("TM", "GPS location received");
+            onLocationGet(location, FogConstants.SOURCE_GPS);
         }
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -233,7 +245,8 @@ public class FogActivity extends FragmentActivity {
     LocationListener networkListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            onLocationGet(location);
+            Log.d("TM", "Network location received");
+            onLocationGet(location, FogConstants.SOURCE_NETWORK);
         }
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -249,16 +262,22 @@ public class FogActivity extends FragmentActivity {
         }
     };
 
-    public void onLocationGet(Location location) {
+    public void onLocationGet(Location location, String source) {
         if (location != null) {
-            for(LatLng point: points) {
-                if(Math.abs(point.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
-                        Math.abs(point.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
+            for(PointLatLng point: points) {
+                if(Math.abs(point.latLng.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
+                        Math.abs(point.latLng.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
                     return;
                 }
             }
-            points.add(new LatLng(location.getLatitude(), location.getLongitude()));
-            mDbHelper.storeSinglePoint(mDbHelper.getWritableDatabase(), points.get(points.size()-1), System.currentTimeMillis());
+//            if(!FogConstants.checkPointValidity(new PointLatLng(new LatLng(location.getLatitude(), location.getLongitude()),
+//                    System.currentTimeMillis(), source ))) {
+//                return;
+//            }
+            points.add(new PointLatLng(new LatLng(location.getLatitude(), location.getLongitude()),
+                    System.currentTimeMillis(), source ));
+            FogActivity.lastLatLng = points.get(points.size()-1);
+            mDbHelper.storeSinglePointLatLng(mDbHelper.getWritableDatabase(), points.get(points.size()-1));
             tileProvider.setPoints(points);
         }
     }
