@@ -56,12 +56,10 @@ import java.util.Set;
 
 public class FogActivity extends FragmentActivity {
 
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private FogMask fogMask;
+    private GoogleMap mMap;
     private TileOverlay overlay;
     private MaskTileProvider tileProvider;
     ArrayList<LatLng> points = new ArrayList<LatLng>();
-    LocationManager mLocationManager;
     LatLngPointsDBHelper mDbHelper;
     private ServiceConnection mConnection;
 
@@ -70,11 +68,11 @@ public class FogActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fog);
 
+        /* load the points from the database */
         mDbHelper = new LatLngPointsDBHelper(this);
-        //mDbHelper.dropTable(mDbHelper.getWritableDatabase());
-        //mDbHelper.onCreate(mDbHelper.getWritableDatabase());
         points = mDbHelper.getPoints(mDbHelper.getReadableDatabase());
 
+        /* launch the service */
         mConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -86,47 +84,8 @@ public class FogActivity extends FragmentActivity {
                 Log.d("TM", "Service Disconnected");
             }
         };
+        /* bind the service, this lets us listen for location updates when the app is in the background */
         bindService(new Intent(this, LocationUpdateService.class), mConnection, Context.BIND_AUTO_CREATE);
-
-//        LocationManager locMgr = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-//
-//        // get high accuracy provider
-//        LocationProvider high=
-//                locMgr.getProvider(locMgr.getBestProvider(FogConstants.createFineCriteria(), true));
-//
-//        // using high accuracy provider... to listen for updates
-//        locMgr.requestLocationUpdates(high.getName(), 0, 0,
-//                new LocationListener() {
-//                    public void onLocationChanged(Location location) {
-//                        // do something here to save this new location
-//                        Log.d("TM", "high location found");
-//                        if(mDbHelper==null) {
-//                            mDbHelper = new LatLngPointsDBHelper(getApplicationContext());
-//                        }
-//                        if(mDbHelper!=null) {
-//                            if(location!=null) {
-//                                ArrayList<LatLng> points = mDbHelper.getPoints(mDbHelper.getReadableDatabase());
-//                                for(LatLng point: points) {
-//                                    //Log.d("TM", "dist: (" + Math.abs(point.latitude - location.getLatitude()) + ", " + Math.abs(point.longitude - location.getLongitude()) + ")");
-//                                    if(Math.abs(point.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
-//                                            Math.abs(point.longitude-location.getLongitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD) {
-//                                        return;
-//                                    }
-//                                }
-//                                mDbHelper.storeSinglePoint(mDbHelper.getWritableDatabase(), new LatLng(location.getLatitude(), location.getLongitude()));
-//                            }
-//                        }
-//                    }
-//                    public void onStatusChanged(String s, int i, Bundle bundle) {
-//
-//                    }
-//                    public void onProviderEnabled(String s) {
-//                        // try switching to a different provider
-//                    }
-//                    public void onProviderDisabled(String s) {
-//                        // try switching to a different provider
-//                    }
-//                });
 
         setUpMapIfNeeded();
     }
@@ -135,6 +94,8 @@ public class FogActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+        points = mDbHelper.getPoints(mDbHelper.getReadableDatabase());
+        tileProvider.setPoints(points);
         overlay.clearTileCache();
     }
 
@@ -170,7 +131,7 @@ public class FogActivity extends FragmentActivity {
                 areYouSure.show(this.getFragmentManager(), "");
                 return true;
             case R.id.dev_menu_data:
-                DataDialogFragment dataFragment = new DataDialogFragment(points);
+                DataDialogFragment dataFragment = DataDialogFragment.newInstance(points);
                 dataFragment.show(this.getFragmentManager(), "");
                 return true;
             default:
@@ -179,37 +140,30 @@ public class FogActivity extends FragmentActivity {
     }
 
     private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
             mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                     .getMap();
-            // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 setUpMap();
             }
         }
     }
 
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
     private void setUpMap() {
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         mMap.setMyLocationEnabled(true);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(points.get(points.size()-1), 14));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(points.size()-1), 14));
+
         // Create new TileOverlayOptions instance.
         tileProvider = new MaskTileProvider(mMap);
         tileProvider.setPoints(points);
         TileOverlayOptions opts = new TileOverlayOptions();
-        opts.fadeIn(false);
+        opts.fadeIn(true);
         // Set the tile provider to your custom implementation.
         opts.tileProvider(tileProvider);
         // Add the tile overlay to the map.
         overlay = mMap.addTileOverlay(opts);
+        /* updater for when the app is in the forefront, this should stop working when the app goes to the back */
         mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
             @Override
             public void onMyLocationChange(Location location) {

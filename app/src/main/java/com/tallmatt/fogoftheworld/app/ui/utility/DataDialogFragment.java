@@ -27,26 +27,41 @@ import java.util.ArrayList;
  * Created by michaudm3 on 5/28/2014.
  */
 public class DataDialogFragment extends DialogFragment {
+    private static final String POINTS_KEY = "POINTS";
 
     ArrayList<LatLng> points;
 
-    public DataDialogFragment(ArrayList<LatLng> points) {
-        this.points = points;
+    public static DataDialogFragment newInstance(ArrayList<LatLng> points) {
+        DataDialogFragment fragment = new DataDialogFragment();
+
+        Bundle args = new Bundle();
+        args.putSerializable(POINTS_KEY, points);
+        fragment.setArguments(args);
+
+        return fragment;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Bundle args = getArguments();
+        if(args!=null && args.containsKey(POINTS_KEY)) {
+            points = (ArrayList<LatLng>) args.getSerializable(POINTS_KEY);
+        } else {
+            points = new ArrayList<LatLng>();
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-
         View root = inflater.inflate(R.layout.dialog_fragment_data, null);
-
         LinearLayout values = (LinearLayout) root.findViewById(R.id.data_values);
 
         addTextLine("Total number of points: "+(points.size()), "Total number of points:", values  );
+        /*
+         * Area of each point, times the number of points, all over the total area of the planet times 100%
+         * This is super estimated and I would love to look at doing percentages based on countries and cities.
+         */
         addTextLine("Very much estimated percentage of the world revealed: "+(
-                MaskTileProvider.radiusConstant/196900000.0*points.size()*100.0+
+                (Math.PI*Math.pow(MaskTileProvider.radiusConstant, 2))/196900000.0*points.size()*100.0+
                         "%"
         ), "Very much estimated percentage of the world revealed:", values);
 

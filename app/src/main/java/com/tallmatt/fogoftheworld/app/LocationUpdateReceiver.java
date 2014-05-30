@@ -20,18 +20,12 @@ import java.util.ArrayList;
  */
 public class LocationUpdateReceiver extends BroadcastReceiver {
 
-    protected static String TAG = "PassiveLocationChangedReceiver";
-
     public LocationUpdateReceiver() {
         super();
     }
 
     /**
-     * When a new location is received, extract it from the Intent and use
-     * it to start the Service used to update the list of nearby places.
-     *
-     * This is the Passive receiver, used to receive Location updates from
-     * third party apps when the Activity is not visible.
+     * When a new location is received, extract it from the Intent and put it into the database
      */
 
     @Override

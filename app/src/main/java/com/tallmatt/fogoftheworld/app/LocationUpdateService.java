@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 /**
@@ -18,8 +19,8 @@ public class LocationUpdateService extends Service {
 
     LocationManager locationManager;
 
-    int locationUpdateTime = 15000;
-    int locationUpdateDistance = 15;
+    long locationUpdateTime = 15000;
+    float locationUpdateDistance = 15;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -30,9 +31,9 @@ public class LocationUpdateService extends Service {
     public void onCreate() {
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-        LocationProvider high=
-                locationManager.getProvider(locationManager.getBestProvider(FogConstants.createFineCriteria(), true));
+       // locationManager.requestLocationUpdates(locationUpdateTime, locationUpdateDistance, FogConstants.createHighCriteria(), GPSListener, null);
 
+        /* might work with these disabled, ill have to test it more */
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, locationUpdateTime, locationUpdateDistance, GPSListener);
             Log.d("TM", "Update Service Created with GPS");
@@ -84,7 +85,7 @@ public class LocationUpdateService extends Service {
 
         @Override
         public void onProviderEnabled(String provider) {
-            //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, locationUpdateTime, locationUpdateDistance, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, locationUpdateTime, locationUpdateDistance, this);
         }
 
         @Override
@@ -106,7 +107,7 @@ public class LocationUpdateService extends Service {
 
         @Override
         public void onProviderEnabled(String provider) {
-            //locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, locationUpdateTime, locationUpdateDistance, this);
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, locationUpdateTime, locationUpdateDistance, this);
         }
 
         @Override
