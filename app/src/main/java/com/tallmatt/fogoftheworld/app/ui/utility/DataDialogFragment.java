@@ -82,13 +82,14 @@ public class DataDialogFragment extends DialogFragment {
         TextView view = new TextView(getActivity());
 
         SpannableStringBuilder sb = new SpannableStringBuilder(text);
-        ForegroundColorSpan fcs = new ForegroundColorSpan(Color.rgb(0, 0, 0));
+        ForegroundColorSpan fcs = new ForegroundColorSpan(Color.BLACK);
         StyleSpan bss = new StyleSpan(android.graphics.Typeface.BOLD);
 
         sb.setSpan(fcs, 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         sb.setSpan(bss, 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
         view.setText(sb);
+        view.setTextColor(Color.BLACK);
         root.addView(view);
     }
 }

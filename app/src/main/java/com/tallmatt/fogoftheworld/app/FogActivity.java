@@ -83,6 +83,10 @@ public class FogActivity extends FragmentActivity {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, networkListener);
             Log.d("TM", "Update Service Created with Network");
         }
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, GPSListener);
+            Log.d("TM", "Update Service Created with GPS");
+        }
 
         setUpMapIfNeeded();
     }
@@ -149,7 +153,9 @@ public class FogActivity extends FragmentActivity {
 
     private void setUpMap() {
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mMap.setIndoorEnabled(false);
         mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(points.size()-1).latLng, 14));
 
         // Create new TileOverlayOptions instance.
@@ -183,10 +189,6 @@ public class FogActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, GPSListener);
-            Log.d("TM", "Update Service Created with GPS");
-        }
         if(mConnection!=null) {
             getBaseContext().unbindService(mConnection);
         }
@@ -195,8 +197,6 @@ public class FogActivity extends FragmentActivity {
     @Override
     public void onStop(){
         super.onStop();
-        Log.d("TM", "GPS listener shut down");
-        locationManager.removeUpdates(GPSListener);
 
         /* launch the service */
         mConnection = new ServiceConnection() {
@@ -217,6 +217,8 @@ public class FogActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d("TM", "GPS listener shut down");
+        locationManager.removeUpdates(GPSListener);
         Log.d("TM", "Network listener shut down");
         locationManager.removeUpdates(networkListener);
         mDbHelper.close();
