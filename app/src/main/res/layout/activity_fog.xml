@@ -2,27 +2,149 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<fragment
-    android:id="@+id/map"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.google.android.gms.maps.MapFragment"
-    android:name="com.google.android.gms.maps.MapFragment"/>
+
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/sliding_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        sothree:dragView="@+id/panel_drag_view"
+        sothree:panelHeight="68dp"
+        sothree:shadowHeight="4dp">
+        <fragment
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.google.android.gms.maps.MapFragment"
+            android:name="com.google.android.gms.maps.MapFragment"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:background="@color/action_bar_background">
+            <LinearLayout
+                android:id="@+id/panel_drag_view"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:padding="8dp"
+                android:background="@color/action_bar_background"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <Button
+                    android:id="@+id/panel_drag_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/standard_button"
+                    android:text="More"
+                    android:textColor="@color/black"
+                    android:textSize="24sp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:background="@color/white"
+                android:orientation="vertical"
+                android:gravity="top|left">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5">
+                        <Button
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/standard_button"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentLeft="true"
+                            android:text="Explore"
+                            android:textColor="@color/action_bar_background"
+                            android:textSize="24sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_centerInParent="true"
+                            android:text="|"
+                            android:textColor="@color/action_bar_background"
+                            android:textSize="24sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentRight="true"
+                            android:text="On"
+                            android:textColor="@color/action_bar_background"
+                            android:textSize="24sp"/>
+                    </RelativeLayout>
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:background="@drawable/standard_button"
+                        android:gravity="center"
+                        android:text="GPS is On"
+                        android:textColor="@color/action_bar_background"
+                        android:textSize="24sp"/>
+                    <!--<FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.75"
+                        android:gravity="center"
+                        android:background="@drawable/background_gray_button_normal"
+                        android:layout_margin="8dp">
+                        <Switch
+                            android:id="@+id/explore_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:gravity="center"
+                            android:text="@string/explore"
+                            android:textColor="@color/white"
+                            android:textSize="24sp"/>
+                    </FrameLayout>-->
+                    <!--<FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:background="@drawable/background_gray_button_normal"
+                        android:layout_margin="8dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="GPS IS ON"
+                            android:textColor="@color/white"
+                            android:textSize="24sp"/>
+                    </FrameLayout>-->
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+
     <!--<com.tallmatt.fogoftheworld.app.FogMask
         android:id="@+id/fog_mask"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />-->
-   <!-- <ImageView
-        android:id="@+id/preview"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"/>-->
+    <!-- <ImageView
+         android:id="@+id/preview"
+         android:layout_width="60dp"
+         android:layout_height="60dp"
+         android:layout_alignParentRight="true"
+         android:layout_alignParentTop="true"/>-->
 </RelativeLayout>
-<!--
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="com.tallmatt.fogoftheworld.app.ui.FogFragment"
-        android:name="com.tallmatt.fogoftheworld.app.ui.FogFragment"/>-->
+    <!--
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.tallmatt.fogoftheworld.app.ui.FogFragment"
+            android:name="com.tallmatt.fogoftheworld.app.ui.FogFragment"/>-->

@@ -31,9 +31,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,6 +47,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.tallmatt.fogoftheworld.app.storage.LatLngPointsDBHelper;
 import com.tallmatt.fogoftheworld.app.ui.utility.AreYouSureDialogFragment;
 import com.tallmatt.fogoftheworld.app.ui.utility.DataDialogFragment;
@@ -67,26 +70,71 @@ public class FogActivity extends FragmentActivity {
 
     public static PointLatLng lastLatLng;
 
+    //Switch exploreSwitch;
+    LinearLayout dragView;
+    TextView dragText;
+    SlidingUpPanelLayout slidingPanel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fog);
+
+        //exploreSwitch = (Switch) findViewById(R.id.explore_switch);
+        dragView = (LinearLayout) findViewById(R.id.panel_drag_view);
+        dragText = (TextView) findViewById(R.id.panel_drag_text);
+        slidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        slidingPanel.setDragView(dragView);
+        slidingPanel.setPanelSlideListener( new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View view, float v) {
+
+            }
+
+            @Override
+            public void onPanelCollapsed(View view) {
+                dragText.setText("More");
+            }
+
+            @Override
+            public void onPanelExpanded(View view) {
+                dragText.setText("Less");
+            }
+
+            @Override
+            public void onPanelAnchored(View view) {
+
+            }
+        });
+        /* launch the service */
+        mConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d("TM", "Service Connected");
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d("TM", "Service Disconnected");
+            }
+        };
+        //exploreSwitch.setOnCheckedChangeListener(exploreSwitchChecked);
 
         /* load the points from the database */
         mDbHelper = new LatLngPointsDBHelper(this);
         points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
         lastLatLng = points.get(points.size()-1);
 
-        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        //locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, networkListener);
-            Log.d("TM", "Update Service Created with Network");
-        }
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, GPSListener);
-            Log.d("TM", "Update Service Created with GPS");
-        }
+//        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+//            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, networkListener);
+//            Log.d("TM", "Update Service Created with Network");
+//        }
+//        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, GPSListener);
+//            Log.d("TM", "Update Service Created with GPS");
+//        }
 
         setUpMapIfNeeded();
     }
@@ -189,38 +237,21 @@ public class FogActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(mConnection!=null) {
-            getBaseContext().unbindService(mConnection);
-        }
+
     }
 
     @Override
     public void onStop(){
         super.onStop();
-
-        /* launch the service */
-        mConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                Log.d("TM", "Service Connected");
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                Log.d("TM", "Service Disconnected");
-            }
-        };
-        /* bind the service, this lets us listen for location updates when the app is in the background */
-        bindService(new Intent(this, LocationUpdateService.class), mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d("TM", "GPS listener shut down");
-        locationManager.removeUpdates(GPSListener);
+        //locationManager.removeUpdates(GPSListener);
         Log.d("TM", "Network listener shut down");
-        locationManager.removeUpdates(networkListener);
+        //locationManager.removeUpdates(networkListener);
         mDbHelper.close();
     }
 
@@ -261,6 +292,18 @@ public class FogActivity extends FragmentActivity {
         @Override
         public void onProviderDisabled(String provider) {
             locationManager.removeUpdates(this);
+        }
+    };
+
+    CompoundButton.OnCheckedChangeListener exploreSwitchChecked = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            if(isChecked) {
+                /* bind the service, this lets us listen for location updates when the app is in the background */
+                bindService(new Intent(getBaseContext(), LocationUpdateService.class), mConnection, Context.BIND_AUTO_CREATE);
+            } else {
+                getBaseContext().unbindService(mConnection);
+            }
         }
     };
 

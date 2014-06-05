@@ -12,8 +12,8 @@ public class FogConstants {
     public static final String LOCATION_UPDATE_SERVICE_LOCATION = "LOCATION";
     public static final double LOCATION_IDENTICAL_THRESHOLD = 0.00025;
 
-    public static final long LOCATION_UPDATE_TIME = 2500;
-    public static final float LOCATION_UPDATE_DISTANCE = 10;
+    public static final long LOCATION_UPDATE_TIME = 500;
+    public static final float LOCATION_UPDATE_DISTANCE = 5;
 
     public static final String SOURCE_UNKNOWN = "UNKNOWN";
     public static final String SOURCE_GPS = "GPS";

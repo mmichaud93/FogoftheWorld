@@ -22,4 +22,6 @@
     <!-- Data Dialog -->
     <string name="data_title">Statistics</string>
 
+    <!-- Layout resources -->
+    <string name="explore">Explore</string>
 </resources>

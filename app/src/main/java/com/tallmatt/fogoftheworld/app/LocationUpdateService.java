@@ -31,8 +31,8 @@ public class LocationUpdateService extends Service {
        // locationManager.requestLocationUpdates(locationUpdateTime, locationUpdateDistance, FogConstants.createHighCriteria(), GPSListener, null);
 
         /* might work with these disabled, ill have to test it more */
-        if(locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, passiveListener);
+        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, passiveListener);
             Log.d("TM", "Update Service Created with Passive");
         }
 
@@ -53,7 +53,7 @@ public class LocationUpdateService extends Service {
 
         @Override
         public void onProviderEnabled(String provider) {
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, this);
         }
 
         @Override
