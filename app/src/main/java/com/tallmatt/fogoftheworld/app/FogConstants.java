@@ -36,11 +36,11 @@ public class FogConstants {
         /*
          * if the distance is really large and the time is really small, then it is a bogus point
          */
-        if(measureDistanceInMeters(point.latLng, FogActivity.lastLatLng.latLng) > 50) {
-            if(point.time-FogActivity.lastLatLng.time < 1000) {
-                return false;
-            }
-        }
+//        if(measureDistanceInMeters(point.latLng, FogActivity.lastLatLng.latLng) > 50) {
+//            if(point.time-FogActivity.lastLatLng.time < 1000) {
+//                return false;
+//            }
+//        }
         return true;
     }
 

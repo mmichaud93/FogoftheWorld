@@ -42,8 +42,8 @@ public class LocationUpdateReceiver extends BroadcastReceiver {
             }
             mDbHelper.storeSinglePointLatLng(mDbHelper.getWritableDatabase(), new PointLatLng(
                     new LatLng(location.getLatitude(), location.getLongitude()), System.currentTimeMillis(), FogConstants.SOURCE_PASSIVE));
-            FogActivity.lastLatLng = new PointLatLng(
-                    new LatLng(location.getLatitude(), location.getLongitude()), System.currentTimeMillis(), FogConstants.SOURCE_PASSIVE);
+//            FogActivity.lastLatLng = new PointLatLng(
+//                    new LatLng(location.getLatitude(), location.getLongitude()), System.currentTimeMillis(), FogConstants.SOURCE_PASSIVE);
             mDbHelper.close();
         }
     }

@@ -3,7 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+    <android.support.v4.view.ViewPager
+        android:id="@+id/fog_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+    </android.support.v4.view.ViewPager>
+    <!--<com.sothree.slidinguppanel.SlidingUpPanelLayout
         xmlns:sothree="http://schemas.android.com/apk/res-auto"
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
@@ -93,7 +99,7 @@
                         android:text="GPS is On"
                         android:textColor="@color/action_bar_background"
                         android:textSize="24sp"/>
-                    <!--<FrameLayout
+                    &lt;!&ndash;<FrameLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="0.75"
@@ -109,8 +115,8 @@
                             android:text="@string/explore"
                             android:textColor="@color/white"
                             android:textSize="24sp"/>
-                    </FrameLayout>-->
-                    <!--<FrameLayout
+                    </FrameLayout>&ndash;&gt;
+                    &lt;!&ndash;<FrameLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.25"
@@ -123,11 +129,11 @@
                             android:text="GPS IS ON"
                             android:textColor="@color/white"
                             android:textSize="24sp"/>
-                    </FrameLayout>-->
+                    </FrameLayout>&ndash;&gt;
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>-->
 
 
     <!--<com.tallmatt.fogoftheworld.app.FogMask
