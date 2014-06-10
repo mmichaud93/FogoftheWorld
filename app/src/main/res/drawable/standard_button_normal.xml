@@ -8,5 +8,5 @@
         android:color="@color/action_bar_background"
         android:width="2dp"/>
     <solid android:color="@color/action_bar_foreground" />
-    <corners android:radius="4dp"/>
+    <corners android:radius="2dp"/>
 </shape>

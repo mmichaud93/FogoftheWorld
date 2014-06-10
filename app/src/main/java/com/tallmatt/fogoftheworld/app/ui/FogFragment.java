@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -14,7 +15,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,6 +28,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.tallmatt.fogoftheworld.app.AnimationUtil;
 import com.tallmatt.fogoftheworld.app.FogConstants;
 import com.tallmatt.fogoftheworld.app.LocationUpdateService;
 import com.tallmatt.fogoftheworld.app.MaskTileProvider;
@@ -41,6 +47,11 @@ public class FogFragment extends Fragment {
         FogFragment fragment = new FogFragment();
         return fragment;
     }
+
+    Button exploreBeginButton;
+    Button exploreStopButton;
+    RelativeLayout exploreBeginLayout;
+    RelativeLayout exploreStopLayout;
 
     private SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -69,12 +80,94 @@ public class FogFragment extends Fragment {
         };
         /* load the points from the database */
         mDbHelper = new LatLngPointsDBHelper(getActivity());
-        startService();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_fog, container, false);
+
+        exploreBeginButton = (Button) root.findViewById(R.id.explore_begin_button);
+        exploreBeginLayout = (RelativeLayout) root.findViewById(R.id.explore_begin_layout);
+        exploreStopButton = (Button) root.findViewById(R.id.explore_stop_button);
+        exploreStopLayout = (RelativeLayout) root.findViewById(R.id.explore_stop_layout);
+
+        exploreBeginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startService();
+                AnimationUtil.slide(exploreBeginLayout, new Point(0,0), new Point(0, -120), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        exploreBeginButton.setEnabled(false);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        exploreBeginLayout.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                AnimationUtil.slide(exploreStopLayout, new Point(0,120), new Point(0, 0), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        exploreStopLayout.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        exploreStopButton.setEnabled(true);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+            }
+        });
+
+        exploreStopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endService();
+                AnimationUtil.slide(exploreBeginLayout, new Point(0,-120), new Point(0, 0), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        exploreBeginLayout.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        exploreBeginButton.setEnabled(true);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                AnimationUtil.slide(exploreStopLayout, new Point(0,0), new Point(0, 120), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        exploreStopButton.setEnabled(false);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        exploreStopLayout.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+            }
+        });
 
         return root;
     }
