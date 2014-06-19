@@ -7,6 +7,6 @@
     <stroke
         android:color="@color/action_bar_background"
         android:width="1dp"/>
-    <solid android:color="@color/action_bar_foreground" />
+    <solid android:color="@color/success_green" />
     <corners android:radius="0dp"/>
 </shape>

@@ -15,40 +15,24 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"/>
     </FrameLayout>
 
-    <RelativeLayout
-        android:id="@+id/explore_begin_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:visibility="visible"
-        android:paddingLeft="48dp"
-        android:paddingRight="48dp"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp">
-        <Button
-            android:id="@+id/explore_begin_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/standard_button"
-            android:text="Begin Exploring"
-            android:textColor="@color/action_bar_background"
-            android:textSize="24sp"/>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/explore_stop_layout"
+    <LinearLayout
+        android:id="@+id/explore_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:visibility="gone"
-        android:padding="8dp">
-        <Button
-            android:id="@+id/explore_stop_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/standard_button"
-            android:text="Stop Exploring"
-            android:textColor="@color/action_bar_background"/>
-    </RelativeLayout>
+        android:orientation="horizontal"
+        android:padding="16dp">
+        <ToggleButton
+            android:id="@+id/explore_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:background="@drawable/standard_toggle_button"
+            android:textOff="Explore"
+            android:textOn="Exploring"
+            android:textColor="@color/action_bar_background"
+            android:textSize="18sp"/>
+    </LinearLayout>
 
 </RelativeLayout>

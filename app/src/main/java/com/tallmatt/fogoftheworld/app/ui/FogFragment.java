@@ -1,7 +1,10 @@
 package com.tallmatt.fogoftheworld.app.ui;
 
+import android.animation.TimeInterpolator;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Point;
@@ -48,10 +51,8 @@ public class FogFragment extends Fragment {
         return fragment;
     }
 
-    Button exploreBeginButton;
-    Button exploreStopButton;
-    RelativeLayout exploreBeginLayout;
-    RelativeLayout exploreStopLayout;
+    boolean exploreEnabled = false;
+    ToggleButton exploreButton;
 
     private SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -60,7 +61,6 @@ public class FogFragment extends Fragment {
     ArrayList<PointLatLng> points = new ArrayList<PointLatLng>();
     LatLngPointsDBHelper mDbHelper;
     private ServiceConnection mConnection;
-    LocationManager locationManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,86 +86,51 @@ public class FogFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_fog, container, false);
 
-        exploreBeginButton = (Button) root.findViewById(R.id.explore_begin_button);
-        exploreBeginLayout = (RelativeLayout) root.findViewById(R.id.explore_begin_layout);
-        exploreStopButton = (Button) root.findViewById(R.id.explore_stop_button);
-        exploreStopLayout = (RelativeLayout) root.findViewById(R.id.explore_stop_layout);
+        exploreButton = (ToggleButton) root.findViewById(R.id.explore_button);
 
-        exploreBeginButton.setOnClickListener(new View.OnClickListener() {
+        exploreButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                startService();
-                AnimationUtil.slide(exploreBeginLayout, new Point(0,0), new Point(0, -120), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        exploreBeginButton.setEnabled(false);
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                exploreEnabled = isChecked;
+                LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);;
+                if (exploreEnabled) {
+                    if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        startService();
+                        if(mMap.getMyLocation()!=null) {
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 14), 500, new GoogleMap.CancelableCallback() {
+                                @Override
+                                public void onFinish() {
+
+                                }
+
+                                @Override
+                                public void onCancel() {
+
+                                }
+                            });
+                        }
+                    } else {
+                        exploreButton.setChecked(false);
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                                .setCancelable(false)
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                        final AlertDialog alert = builder.create();
+                        alert.show();
                     }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        exploreBeginLayout.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                AnimationUtil.slide(exploreStopLayout, new Point(0,120), new Point(0, 0), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        exploreStopLayout.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        exploreStopButton.setEnabled(true);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-            }
-        });
-
-        exploreStopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endService();
-                AnimationUtil.slide(exploreBeginLayout, new Point(0,-120), new Point(0, 0), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        exploreBeginLayout.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        exploreBeginButton.setEnabled(true);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                AnimationUtil.slide(exploreStopLayout, new Point(0,0), new Point(0, 120), AnimationUtil.DURATION_SHORT, AnimationUtil.DURATION_NONE, true, true, new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        exploreStopButton.setEnabled(false);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        exploreStopLayout.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
+                } else {
+                    endService();
+                }
             }
         });
 
@@ -207,7 +172,9 @@ public class FogFragment extends Fragment {
         mMap.setIndoorEnabled(false);
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(false);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(points.size() - 1).latLng, 14));
+        if(points.size()>0) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(points.size() - 1).latLng, 14));
+        }
 
         // Create new TileOverlayOptions instance.
         tileProvider = new MaskTileProvider(mMap);

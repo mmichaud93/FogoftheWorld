@@ -7,8 +7,11 @@
     <color name="success_green">#00ff00</color>
     <color name="failure_red">#ff0000</color>
     <color name="app_blue">#2c8fff</color>
+    <color name="app_orange">#ff8800</color>
 
     <color name="action_bar_background">#2c2c2c</color>
+    <color name="action_bar_background_active">#2c2c2c</color>
     <color name="action_bar_foreground">#f6f6f6</color>
-    <color name="action_bar_highlight">#ff8800</color>
+    <color name="action_bar_foreground_active">#ededed</color>
+    <color name="action_bar_highlight">#2c8fff</color>
 </resources>

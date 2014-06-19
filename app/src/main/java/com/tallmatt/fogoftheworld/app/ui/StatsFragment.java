@@ -6,7 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.tallmatt.fogoftheworld.app.PointLatLng;
 import com.tallmatt.fogoftheworld.app.R;
+import com.tallmatt.fogoftheworld.app.storage.LatLngPointsDBHelper;
+
+import java.util.ArrayList;
 
 /**
  * Created by michaudm3 on 6/5/2014.
@@ -18,9 +22,17 @@ public class StatsFragment  extends Fragment {
         return fragment;
     }
 
+    LatLngPointsDBHelper mDbHelper;
+    ArrayList<PointLatLng> points = new ArrayList<PointLatLng>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /* load the points from the database */
+        mDbHelper = new LatLngPointsDBHelper(getActivity());
+        points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
+        mDbHelper.close();
     }
 
     @Override
