@@ -1,0 +1,8 @@
+<!-- From: file:/Users/anton/projects/sothree/AndroidSlidingUpPanelDemo/library/AndroidManifest.xml -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="5" android:versionName="2.0.0" package="com.sothree.slidinguppanel.library">
+
+    <uses-sdk android:minSdkVersion="8"/>
+
+    <application/>
+
+</manifest>

@@ -20,6 +20,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileProvider;
+import com.tallmatt.fogoftheworld.app.quadtree.QuadTree;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class MaskTileProvider implements TileProvider {
     Paint maskPaint;
     Paint fogPaint;
     ArrayList<PointLatLng> points;
+    QuadTree tree;
     Bitmap mask;
     Canvas maskCanvas;
 
@@ -64,9 +66,9 @@ public class MaskTileProvider implements TileProvider {
         }
     }
 
-    public MaskTileProvider (GoogleMap map) {
+    public MaskTileProvider (GoogleMap map, QuadTree tree) {
         this.map = map;
-
+        this.tree = tree;
         // this paint is transparent, anything in the mask drawn with this paint will not affect the fog
         keepPaint = new Paint();
         keepPaint.setStyle(Paint.Style.FILL);
@@ -106,16 +108,19 @@ public class MaskTileProvider implements TileProvider {
             // no one is making a tile so we should start and lock everyone out
             lock = true;
             try {
+                long start = System.currentTimeMillis();
                 LatLngBounds bounds = boundsOfTile(x,y,zoom);
                 // generate the mask
                 mask = Bitmap.createBitmap(bitmapWidth, bitmapHeight, conf);
                 maskCanvas = new Canvas(mask);
+                com.tallmatt.fogoftheworld.app.quadtree.Point[] ps = tree.searchWithin(bounds.southwest.latitude - 0.01, bounds.southwest.longitude - 0.01,
+                        bounds.northeast.latitude + 0.01, bounds.northeast.longitude + 0.01);
                 // draw the points on the mask as black circles
                 int pointsOnTile = 0;
-                for(PointLatLng ll : points) {
-                    if(!ll.source.equals(FogConstants.SOURCE_NETWORK)) {
-                        if (ll.latLng.longitude < bounds.northeast.longitude + 0.01 && ll.latLng.longitude > bounds.southwest.longitude - 0.01 &&
-                                ll.latLng.latitude < bounds.northeast.latitude + 0.01 && ll.latLng.latitude > bounds.southwest.latitude - 0.01) {//bounds.contains(ll)) {
+                for(com.tallmatt.fogoftheworld.app.quadtree.Point point : ps) {
+                    PointLatLng ll = (PointLatLng)point.getValue();
+                    if(ll!=null) {
+                        if(!ll.source.equals(FogConstants.SOURCE_NETWORK)) {
                             double thisTileWidth = bounds.northeast.longitude - bounds.southwest.longitude;
                             double thisTileHeight = bounds.northeast.latitude - bounds.southwest.latitude;
                             //Log.d("TM", "zoom/bitwidth = "+((float)zoom/bitmapWidth));
@@ -133,7 +138,27 @@ public class MaskTileProvider implements TileProvider {
                         }
                     }
                 }
-
+                /*for(PointLatLng ll : points) {
+                    if(!ll.source.equals(FogConstants.SOURCE_NETWORK)) {
+                        if (ll.latLng.longitude < bounds.northeast.longitude + 0.01 && ll.latLng.longitude > bounds.southwest.longitude - 0.01 &&
+                                ll.latLng.latitude < bounds.northeast.latitude + 0.01 && ll.latLng.latitude > bounds.southwest.latitude - 0.01) {
+                            double thisTileWidth = bounds.northeast.longitude - bounds.southwest.longitude;
+                            double thisTileHeight = bounds.northeast.latitude - bounds.southwest.latitude;
+                            //Log.d("TM", "zoom/bitwidth = "+((float)zoom/bitmapWidth));
+                            //Log.d("TM", "thisTileWidth*(zoom/bitwidth) = "+(thisTileWidth*(float)zoom/bitmapWidth));
+                            float radius = (float) (radiusConstant * (float) bitmapWidth / thisTileWidth);
+                            clearAwayPaint.setShader(new RadialGradient(
+                                    (float) ((((ll.latLng.longitude - bounds.southwest.longitude) / thisTileWidth) * bitmapWidth)),
+                                    (float) (bitmapHeight - (((ll.latLng.latitude - bounds.southwest.latitude) / thisTileHeight) * bitmapHeight)),
+                                    radius, Color.BLACK, Color.TRANSPARENT, Shader.TileMode.MIRROR));
+                            maskCanvas.drawCircle(
+                                    (float) ((((ll.latLng.longitude - bounds.southwest.longitude) / thisTileWidth) * bitmapWidth)),
+                                    (float) (bitmapHeight - (((ll.latLng.latitude - bounds.southwest.latitude) / thisTileHeight) * bitmapHeight)),
+                                    radius, clearAwayPaint);
+                            pointsOnTile++;
+                        }
+                    }
+                }*/
                 // create the bitmap that will eventually become the tile
                 result = Bitmap.createBitmap(bitmapWidth, bitmapHeight, conf);
 
@@ -154,6 +179,7 @@ public class MaskTileProvider implements TileProvider {
 //                Log.d("TM", "tile returned: (" + x + ", " + y + ", " + zoom + ")");
                 // release the lock
                 lock = false;
+//                Log.d("TM", "points drawn: "+pointsOnTile+" in "+(System.currentTimeMillis()-start)+" ms");
                 // return the tile
                 return tile;
             } catch(Exception e) {

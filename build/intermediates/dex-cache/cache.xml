@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\app\build\intermediates\pre-dexed\debug\classes-2a9d91747116fae8698b0c074aa816902ca708df.jar"
+        jar="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\build\intermediates\exploded-aar\com.sothree.slidinguppanel\library\2.0.1\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="7049d768a49b1aad020d9aecdd037f1d9436e11f"/>
+    <item
+        dex="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\app\build\intermediates\pre-dexed\debug\classes-c10b61a2a4af9891cce8160155b3d23c49232581.jar"
+        jar="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\build\intermediates\exploded-aar\com.google.android.gms\play-services\4.3.23\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="7676c0cb230efa6ac41c47867d372ed5913029d4"/>
+    <item
+        dex="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\app\build\intermediates\pre-dexed\debug\classes-74fe7f24a69312a3b18e525e382d77088ad03c06.jar"
+        jar="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
+    <item
+        dex="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\app\build\intermediates\pre-dexed\debug\library-2.4.0-683de32db58955b90997573a6f8ff3a443504bbc.jar"
+        jar="C:\Users\michaudm3\.gradle\caches\modules-2\files-2.1\com.nineoldandroids\library\2.4.0\e9b63380f3a242dbdbf103a2355ad7e43bad17cb\library-2.4.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb"/>
+    <item
+        dex="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-1557a5034e0093b7cb9ed6f9c7fbee1d730a20cc.jar"
+        jar="C:\Users\michaudm3\AppData\Local\Android\android-sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+    <item
+        dex="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\app\build\intermediates\pre-dexed\debug\gson-2.2.4-9a2336a4facf0246aa4a6c32bcc821f632101214.jar"
+        jar="C:\Users\michaudm3\.gradle\caches\modules-2\files-2.1\com.google.code.gson\gson\2.2.4\a60a5e993c98c864010053cb901b7eab25306568\gson-2.2.4.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="a60a5e993c98c864010053cb901b7eab25306568"/>
+    <item
+        dex="C:\Users\michaudm3\Documents\GitHub\FogoftheWorld\app\build\intermediates\pre-dexed\debug\retrofit-1.6.1-c749d1bc64bd4a14521ddb6cd2d43b3f74ebee51.jar"
+        jar="C:\Users\michaudm3\.gradle\caches\modules-2\files-2.1\com.squareup.retrofit\retrofit\1.6.1\efb0a36546aa8857ab8df358b106c1817e03cbee\retrofit-1.6.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="efb0a36546aa8857ab8df358b106c1817e03cbee"/>
+
+</pre-dex-items>

@@ -5,12 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Handler;
 import android.util.Log;
-import android.view.ActionMode;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.tallmatt.fogoftheworld.app.PointLatLng;
+import com.tallmatt.fogoftheworld.app.ui.utility.DBUtil;
 
 import java.util.ArrayList;
 
@@ -20,7 +19,7 @@ import java.util.ArrayList;
 public class LatLngPointsDBHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "LngLatPoint.db";
+    public static final String DATABASE_NAME = "LngLatPoint2.db";
     public Context context;
 
     public LatLngPointsDBHelper(Context context) {
@@ -31,7 +30,9 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_ENTRIES);
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_ENTRIES);
+        db.execSQL("ALTER TABLE "+ DBContract.PointEntry.TABLE_NAME+" ADD "+ DBContract.PointEntry.COLUMN_NAME_ADDRESS+" DEFAULT \"none\"");
+        db.execSQL("ALTER TABLE "+ DBContract.PointEntry.TABLE_NAME+" ADD "+ DBContract.PointEntry.COLUMN_NAME_LOCALITY);
+        db.execSQL("ALTER TABLE "+ DBContract.PointEntry.TABLE_NAME+" ADD "+ DBContract.PointEntry.COLUMN_NAME_COUNTRY);
         onCreate(db);
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -54,37 +55,37 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
     public void storeSinglePoint(SQLiteDatabase db, LatLng point) {
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
 
         // Insert the new row, returning the primary key value of the new row
         db.insert(
-                LatLngPointsContract.PointEntry.TABLE_NAME,
+                DBContract.PointEntry.TABLE_NAME,
                 "null",
                 values);
     }
     public void storeSinglePoint(SQLiteDatabase db, LatLng point, long time) {
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_TIME, time);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_TIME, time);
 
         // Insert the new row, returning the primary key value of the new row
         db.insert(
-                LatLngPointsContract.PointEntry.TABLE_NAME,
+                DBContract.PointEntry.TABLE_NAME,
                 "null",
                 values);
     }
     public void storeSinglePoint(SQLiteDatabase db, LatLng point, StoreSinglePointCallback callback) {
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LAT, point.latitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LNG, point.longitude);
 
         // Insert the new row, returning the primary key value of the new row
         db.insert(
-                LatLngPointsContract.PointEntry.TABLE_NAME,
+                DBContract.PointEntry.TABLE_NAME,
                 "null",
                 values);
         callback.complete();
@@ -92,14 +93,17 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
     public void storeSinglePointLatLng(SQLiteDatabase db, PointLatLng point) {
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LAT, point.latLng.latitude);
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_LNG, point.latLng.longitude);
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_TIME, point.time);
-        values.put(LatLngPointsContract.PointEntry.COLUMN_NAME_SRC, point.source);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LAT, point.latLng.latitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LNG, point.latLng.longitude);
+        values.put(DBContract.PointEntry.COLUMN_NAME_TIME, point.time);
+        values.put(DBContract.PointEntry.COLUMN_NAME_SRC, point.source);
+        values.put(DBContract.PointEntry.COLUMN_NAME_ADDRESS, point.address[0]);
+        values.put(DBContract.PointEntry.COLUMN_NAME_LOCALITY, point.address[1]);
+        values.put(DBContract.PointEntry.COLUMN_NAME_COUNTRY, point.address[2]);
 
         // Insert the new row, returning the primary key value of the new row
         db.insert(
-                LatLngPointsContract.PointEntry.TABLE_NAME,
+                DBContract.PointEntry.TABLE_NAME,
                 "null",
                 values);
     }
@@ -107,16 +111,19 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                LatLngPointsContract.PointEntry.COLUMN_NAME_LAT,
-                LatLngPointsContract.PointEntry.COLUMN_NAME_LNG,
-                LatLngPointsContract.PointEntry.COLUMN_NAME_TIME,
-                LatLngPointsContract.PointEntry.COLUMN_NAME_SRC
+                DBContract.PointEntry.COLUMN_NAME_LAT,
+                DBContract.PointEntry.COLUMN_NAME_LNG,
+                DBContract.PointEntry.COLUMN_NAME_TIME,
+                DBContract.PointEntry.COLUMN_NAME_SRC,
+                DBContract.PointEntry.COLUMN_NAME_ADDRESS,
+                DBContract.PointEntry.COLUMN_NAME_LOCALITY,
+                DBContract.PointEntry.COLUMN_NAME_COUNTRY,
         };
 
         // How you want the results sorted in the resulting Cursor
 
         Cursor c = db.query(
-                LatLngPointsContract.PointEntry.TABLE_NAME,  // The table to query
+                DBContract.PointEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 null,                                // The columns for the WHERE clause
                 null,                            // The values for the WHERE clause
@@ -129,7 +136,7 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
             do {
                 points.add(new PointLatLng(
                         new LatLng(c.getFloat(0), c.getFloat(1)),
-                        c.getLong(2), c.getString(3)));
+                        c.getLong(2), c.getString(3), c.getString(4), c.getString(5), c.getString(6)));
             } while(c.moveToNext());
         }
         return points;
@@ -138,14 +145,14 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                LatLngPointsContract.PointEntry.COLUMN_NAME_LAT,
-                LatLngPointsContract.PointEntry.COLUMN_NAME_LNG
+                DBContract.PointEntry.COLUMN_NAME_LAT,
+                DBContract.PointEntry.COLUMN_NAME_LNG
         };
 
         // How you want the results sorted in the resulting Cursor
 
         Cursor c = db.query(
-                LatLngPointsContract.PointEntry.TABLE_NAME,  // The table to query
+                DBContract.PointEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 null,                                // The columns for the WHERE clause
                 null,                            // The values for the WHERE clause
@@ -163,11 +170,11 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
     }
     public ArrayList<Long> getTimes(SQLiteDatabase db) {
         String[] projection = {
-                LatLngPointsContract.PointEntry.COLUMN_NAME_TIME
+                DBContract.PointEntry.COLUMN_NAME_TIME
         };
 
         Cursor c = db.query(
-                LatLngPointsContract.PointEntry.TABLE_NAME,  // The table to query
+                DBContract.PointEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 null,                                // The columns for the WHERE clause
                 null,                            // The values for the WHERE clause
@@ -185,11 +192,11 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
     }
     public ArrayList<String> getSources(SQLiteDatabase db) {
         String[] projection = {
-                LatLngPointsContract.PointEntry.COLUMN_NAME_SRC
+                DBContract.PointEntry.COLUMN_NAME_SRC
         };
 
         Cursor c = db.query(
-                LatLngPointsContract.PointEntry.TABLE_NAME,  // The table to query
+                DBContract.PointEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 null,                                // The columns for the WHERE clause
                 null,                            // The values for the WHERE clause
@@ -205,20 +212,19 @@ public class LatLngPointsDBHelper extends SQLiteOpenHelper {
         }
         return times;
     }
-    private static final String TEXT_TYPE = " TEXT";
-    private static final String FLOAT_TYPE = " FLOAT";
-    private static final String LONG_TYPE = " LONG";
-    private static final String COMMA_SEP = ",";
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + LatLngPointsContract.PointEntry.TABLE_NAME + " (" +
-                    LatLngPointsContract.PointEntry._ID + " INTEGER PRIMARY KEY," +
-                    LatLngPointsContract.PointEntry.COLUMN_NAME_LAT + FLOAT_TYPE + COMMA_SEP +
-                    LatLngPointsContract.PointEntry.COLUMN_NAME_LNG + FLOAT_TYPE + COMMA_SEP +
-                    LatLngPointsContract.PointEntry.COLUMN_NAME_ACC + FLOAT_TYPE + COMMA_SEP +
-                    LatLngPointsContract.PointEntry.COLUMN_NAME_TIME + LONG_TYPE + COMMA_SEP +
-                    LatLngPointsContract.PointEntry.COLUMN_NAME_SRC + TEXT_TYPE +
+            "CREATE TABLE " + DBContract.PointEntry.TABLE_NAME + " (" +
+                    DBContract.PointEntry._ID + " INTEGER PRIMARY KEY," +
+                    DBContract.PointEntry.COLUMN_NAME_LAT + DBUtil.FLOAT_TYPE + DBUtil.COMMA_SEP +
+                    DBContract.PointEntry.COLUMN_NAME_LNG + DBUtil.FLOAT_TYPE + DBUtil.COMMA_SEP +
+                    DBContract.PointEntry.COLUMN_NAME_ACC + DBUtil.FLOAT_TYPE + DBUtil.COMMA_SEP +
+                    DBContract.PointEntry.COLUMN_NAME_TIME + DBUtil.LONG_TYPE + DBUtil.COMMA_SEP +
+                    DBContract.PointEntry.COLUMN_NAME_ADDRESS + DBUtil.TEXT_TYPE + DBUtil.COMMA_SEP +
+                    DBContract.PointEntry.COLUMN_NAME_LOCALITY + DBUtil.TEXT_TYPE + DBUtil.COMMA_SEP +
+                    DBContract.PointEntry.COLUMN_NAME_COUNTRY + DBUtil.TEXT_TYPE + DBUtil.COMMA_SEP +
+                    DBContract.PointEntry.COLUMN_NAME_SRC + DBUtil.TEXT_TYPE +
                     " )";
 
     private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + LatLngPointsContract.PointEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + DBContract.PointEntry.TABLE_NAME;
 }

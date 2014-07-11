@@ -37,6 +37,7 @@ import com.tallmatt.fogoftheworld.app.LocationUpdateService;
 import com.tallmatt.fogoftheworld.app.MaskTileProvider;
 import com.tallmatt.fogoftheworld.app.PointLatLng;
 import com.tallmatt.fogoftheworld.app.R;
+import com.tallmatt.fogoftheworld.app.quadtree.QuadTree;
 import com.tallmatt.fogoftheworld.app.storage.LatLngPointsDBHelper;
 
 import java.util.ArrayList;
@@ -62,6 +63,8 @@ public class FogFragment extends Fragment {
     LatLngPointsDBHelper mDbHelper;
     private ServiceConnection mConnection;
 
+    QuadTree tree;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +83,14 @@ public class FogFragment extends Fragment {
         };
         /* load the points from the database */
         mDbHelper = new LatLngPointsDBHelper(getActivity());
+        long start = System.currentTimeMillis();
+        tree = new QuadTree(-180.0,-90.0,180.0,90.0);
+        points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
+        for(PointLatLng point : points) {
+            Log.d("TM", point.address[0]+" : "+point.address[1]+" : "+point.address[2]);
+            tree.set(point.latLng.latitude, point.latLng.longitude, point);
+        }
+        Log.d("TM", "points stored: "+points.size()+" in "+(System.currentTimeMillis()-start)+" ms");
     }
 
     @Override
@@ -177,8 +188,8 @@ public class FogFragment extends Fragment {
         }
 
         // Create new TileOverlayOptions instance.
-        tileProvider = new MaskTileProvider(mMap);
-        tileProvider.setPoints(points);
+        tileProvider = new MaskTileProvider(mMap, tree);
+        //tileProvider.setPoints(points);
         TileOverlayOptions opts = new TileOverlayOptions();
         opts.fadeIn(true);
         // Set the tile provider to your custom implementation.
@@ -187,7 +198,7 @@ public class FogFragment extends Fragment {
         overlay = mMap.addTileOverlay(opts);
     }
 
-    public void onLocationGet(Location location, String source) {
+    /*public void onLocationGet(Location location, String source) {
         if (location != null) {
             for(PointLatLng point: points) {
                 if(Math.abs(point.latLng.latitude-location.getLatitude()) < FogConstants.LOCATION_IDENTICAL_THRESHOLD &&
@@ -200,7 +211,7 @@ public class FogFragment extends Fragment {
             mDbHelper.storeSinglePointLatLng(mDbHelper.getWritableDatabase(), points.get(points.size()-1));
             tileProvider.setPoints(points);
         }
-    }
+    }*/
 
     public void startService() {
         /* bind the service, this lets us listen for location updates when the app is in the background */

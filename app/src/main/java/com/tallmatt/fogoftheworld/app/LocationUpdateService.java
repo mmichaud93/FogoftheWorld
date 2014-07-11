@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 
 /**
@@ -32,17 +30,17 @@ public class LocationUpdateService extends Service {
 
         /* might work with these disabled, ill have to test it more */
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, passiveListener);
-            Log.d("TM", "Update Service Created with Passive");
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FogConstants.LOCATION_UPDATE_TIME, FogConstants.LOCATION_UPDATE_DISTANCE, gpsListener);
+            Log.d("TM", "Update Service Created with GPS");
         }
 
         super.onCreate();
     }
 
-    LocationListener passiveListener = new LocationListener() {
+    LocationListener gpsListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Log.d("TM", "Passive location received");
+            Log.d("TM", "GPS location received");
             registerLocationChange(location);
         }
 
@@ -63,7 +61,6 @@ public class LocationUpdateService extends Service {
     };
 
     public void registerLocationChange(Location location) {
-        //Log.d("TM", "location changed ("+location.getLatitude()+", "+location.getLongitude()+")");
         Intent intent = new Intent();
         intent.setAction(FogConstants.LOCATION_UPDATE_SERVICE_ACTION);
         intent.putExtra(FogConstants.LOCATION_UPDATE_SERVICE_LOCATION, location);
@@ -73,6 +70,6 @@ public class LocationUpdateService extends Service {
     @Override
     public void onDestroy() {
         Log.d("TM", "Update Service Destroyed");
-        locationManager.removeUpdates(passiveListener);
+        locationManager.removeUpdates(gpsListener);
     }
 }
