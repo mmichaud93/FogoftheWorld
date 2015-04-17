@@ -5,7 +5,7 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
  
-    <item android:drawable="@drawable/standard_button_pressed_green" android:state_checked="true" />
+    <item android:drawable="@drawable/standard_button_pressed_red" android:state_checked="true" />
     <item android:drawable="@drawable/standard_button_normal" android:state_checked="false"/>
  
 </selector>

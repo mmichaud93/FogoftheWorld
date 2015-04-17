@@ -1,4 +1,4 @@
-package com.tallmatt.fogoftheworld.app.rest;
+package com.tallmatt.fogoftheworld.app.api;
 
 import com.tallmatt.fogoftheworld.app.models.LocationAreaModel;
 

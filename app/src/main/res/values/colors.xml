@@ -6,6 +6,7 @@
 
     <color name="success_green">#00ff00</color>
     <color name="failure_red">#ff0000</color>
+    <color name="red_light">#ff6666</color>
     <color name="app_blue">#2c8fff</color>
     <color name="app_orange">#ff8800</color>
 

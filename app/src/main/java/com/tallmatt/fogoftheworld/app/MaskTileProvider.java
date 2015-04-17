@@ -93,10 +93,6 @@ public class MaskTileProvider implements TileProvider {
         // to lock out some tiles so that only one is being created at a time
         points = new ArrayList<PointLatLng>();
 
-        //points.add(new LatLng(42.342969f, -71.100892f));
-        //points.add(new LatLng(42.342832f, -71.100920f));
-        //points.add(new LatLng(42.342645f, -71.100785f));
-
     }
     public void setPoints(ArrayList<PointLatLng> points) {
         this.points = points;
@@ -123,8 +119,7 @@ public class MaskTileProvider implements TileProvider {
                         if(!ll.source.equals(FogConstants.SOURCE_NETWORK)) {
                             double thisTileWidth = bounds.northeast.longitude - bounds.southwest.longitude;
                             double thisTileHeight = bounds.northeast.latitude - bounds.southwest.latitude;
-                            //Log.d("TM", "zoom/bitwidth = "+((float)zoom/bitmapWidth));
-                            //Log.d("TM", "thisTileWidth*(zoom/bitwidth) = "+(thisTileWidth*(float)zoom/bitmapWidth));
+
                             float radius = (float) (radiusConstant * (float) bitmapWidth / thisTileWidth);
                             clearAwayPaint.setShader(new RadialGradient(
                                     (float) ((((ll.latLng.longitude - bounds.southwest.longitude) / thisTileWidth) * bitmapWidth)),
@@ -138,27 +133,6 @@ public class MaskTileProvider implements TileProvider {
                         }
                     }
                 }
-                /*for(PointLatLng ll : points) {
-                    if(!ll.source.equals(FogConstants.SOURCE_NETWORK)) {
-                        if (ll.latLng.longitude < bounds.northeast.longitude + 0.01 && ll.latLng.longitude > bounds.southwest.longitude - 0.01 &&
-                                ll.latLng.latitude < bounds.northeast.latitude + 0.01 && ll.latLng.latitude > bounds.southwest.latitude - 0.01) {
-                            double thisTileWidth = bounds.northeast.longitude - bounds.southwest.longitude;
-                            double thisTileHeight = bounds.northeast.latitude - bounds.southwest.latitude;
-                            //Log.d("TM", "zoom/bitwidth = "+((float)zoom/bitmapWidth));
-                            //Log.d("TM", "thisTileWidth*(zoom/bitwidth) = "+(thisTileWidth*(float)zoom/bitmapWidth));
-                            float radius = (float) (radiusConstant * (float) bitmapWidth / thisTileWidth);
-                            clearAwayPaint.setShader(new RadialGradient(
-                                    (float) ((((ll.latLng.longitude - bounds.southwest.longitude) / thisTileWidth) * bitmapWidth)),
-                                    (float) (bitmapHeight - (((ll.latLng.latitude - bounds.southwest.latitude) / thisTileHeight) * bitmapHeight)),
-                                    radius, Color.BLACK, Color.TRANSPARENT, Shader.TileMode.MIRROR));
-                            maskCanvas.drawCircle(
-                                    (float) ((((ll.latLng.longitude - bounds.southwest.longitude) / thisTileWidth) * bitmapWidth)),
-                                    (float) (bitmapHeight - (((ll.latLng.latitude - bounds.southwest.latitude) / thisTileHeight) * bitmapHeight)),
-                                    radius, clearAwayPaint);
-                            pointsOnTile++;
-                        }
-                    }
-                }*/
                 // create the bitmap that will eventually become the tile
                 result = Bitmap.createBitmap(bitmapWidth, bitmapHeight, conf);
 
@@ -176,10 +150,10 @@ public class MaskTileProvider implements TileProvider {
                 byteArray = stream.toByteArray();
                 // use the bytearray to create the tile
                 Tile tile = new Tile(bitmapWidth, bitmapHeight, byteArray);
-//                Log.d("TM", "tile returned: (" + x + ", " + y + ", " + zoom + ")");
+
                 // release the lock
                 lock = false;
-//                Log.d("TM", "points drawn: "+pointsOnTile+" in "+(System.currentTimeMillis()-start)+" ms");
+
                 // return the tile
                 return tile;
             } catch(Exception e) {

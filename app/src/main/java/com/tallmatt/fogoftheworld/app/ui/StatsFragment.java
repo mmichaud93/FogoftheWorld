@@ -9,8 +9,6 @@ import android.view.ViewGroup;
 
 import com.tallmatt.fogoftheworld.app.PointLatLng;
 import com.tallmatt.fogoftheworld.app.R;
-import com.tallmatt.fogoftheworld.app.models.LocationAreaModel;
-import com.tallmatt.fogoftheworld.app.rest.FreebaseService;
 import com.tallmatt.fogoftheworld.app.storage.AreaDBHelper;
 import com.tallmatt.fogoftheworld.app.storage.LatLngPointsDBHelper;
 
@@ -22,18 +20,11 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit.Callback;
 import retrofit.RestAdapter;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 /**
  * Created by michaudm3 on 6/5/2014.

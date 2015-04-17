@@ -1,14 +1,11 @@
 package com.tallmatt.fogoftheworld.app.ui;
 
-import android.animation.TimeInterpolator;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Point;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -18,29 +15,36 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.tallmatt.fogoftheworld.app.AnimationUtil;
-import com.tallmatt.fogoftheworld.app.FogConstants;
+import com.tallmatt.fogoftheworld.app.FogActivity;
 import com.tallmatt.fogoftheworld.app.LocationUpdateService;
 import com.tallmatt.fogoftheworld.app.MaskTileProvider;
 import com.tallmatt.fogoftheworld.app.PointLatLng;
 import com.tallmatt.fogoftheworld.app.R;
+import com.tallmatt.fogoftheworld.app.Utility;
+import com.tallmatt.fogoftheworld.app.api.CommandCenterController;
+import com.tallmatt.fogoftheworld.app.models.CommandCenterResponseModel;
 import com.tallmatt.fogoftheworld.app.quadtree.QuadTree;
 import com.tallmatt.fogoftheworld.app.storage.LatLngPointsDBHelper;
 
 import java.util.ArrayList;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by michaudm3 on 5/12/2014.
@@ -54,6 +58,9 @@ public class FogFragment extends Fragment {
 
     boolean exploreEnabled = false;
     ToggleButton exploreButton;
+    LinearLayout exploreLayout;
+    ProgressBar levelBar;
+    TextView levelText;
 
     private SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -64,6 +71,9 @@ public class FogFragment extends Fragment {
     private ServiceConnection mConnection;
 
     QuadTree tree;
+
+    int oldWidth = 0;
+    double level;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,8 +96,24 @@ public class FogFragment extends Fragment {
         long start = System.currentTimeMillis();
         tree = new QuadTree(-180.0,-90.0,180.0,90.0);
         points = mDbHelper.getPointLatLngs(mDbHelper.getReadableDatabase());
+
+        CommandCenterController.logDatabaseLoad(FogActivity.USERNAME, points.size(),
+                System.currentTimeMillis() - start, System.currentTimeMillis(), new Callback<CommandCenterResponseModel>() {
+                    @Override
+                    public void success(CommandCenterResponseModel commandCenterResponseModel, Response response) {
+
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+
+                    }
+                });
+
+        level = getCurrentLevel(points.size());
+        Log.d("TM", "current level: "+level);
         for(PointLatLng point : points) {
-            Log.d("TM", point.address[0]+" : "+point.address[1]+" : "+point.address[2]);
+            //Log.d("TM", point.address[0]+" : "+point.address[1]+" : "+point.address[2]);
             tree.set(point.latLng.latitude, point.latLng.longitude, point);
         }
         Log.d("TM", "points stored: "+points.size()+" in "+(System.currentTimeMillis()-start)+" ms");
@@ -97,17 +123,28 @@ public class FogFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_fog, container, false);
 
-        exploreButton = (ToggleButton) root.findViewById(R.id.explore_button);
+        levelBar = (ProgressBar) root.findViewById(R.id.level_bar);
+        levelBar.setProgress((int) (100 * (level % 1)));
+        levelText = (TextView) root.findViewById(R.id.level_text);
+        levelText.setText(Integer.toString((int) (level)));
 
+        exploreButton = (ToggleButton) root.findViewById(R.id.explore_button);
+        exploreLayout = (LinearLayout) root.findViewById(R.id.explore_layout);
         exploreButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 exploreEnabled = isChecked;
                 LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);;
                 if (exploreEnabled) {
+                    // make the button a width of 48dp
+                    oldWidth = exploreLayout.getWidth();
+                    AnimationUtil.ResizeWidthAnimation anim = new AnimationUtil.ResizeWidthAnimation(exploreLayout, (int)(Utility.dpToPx(80, getActivity())));
+                    anim.setDuration(300);
+                    exploreLayout.startAnimation(anim);
+
                     if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         startService();
-                        if(mMap.getMyLocation()!=null) {
+                        if(mMap!=null && mMap.getMyLocation()!=null) {
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 14), 500, new GoogleMap.CancelableCallback() {
                                 @Override
@@ -140,6 +177,9 @@ public class FogFragment extends Fragment {
                         alert.show();
                     }
                 } else {
+                    AnimationUtil.ResizeWidthAnimation anim = new AnimationUtil.ResizeWidthAnimation(exploreLayout, oldWidth);
+                    anim.setDuration(350);
+                    exploreLayout.startAnimation(anim);
                     endService();
                 }
             }
@@ -212,13 +252,21 @@ public class FogFragment extends Fragment {
             tileProvider.setPoints(points);
         }
     }*/
-
+    private boolean serviceActive = false;
     public void startService() {
         /* bind the service, this lets us listen for location updates when the app is in the background */
         getActivity().bindService(new Intent(getActivity(), LocationUpdateService.class), mConnection, Context.BIND_AUTO_CREATE);
+        serviceActive = true;
     }
 
     public void endService() {
-        getActivity().unbindService(mConnection);
+        if(serviceActive) {
+            getActivity().unbindService(mConnection);
+            serviceActive = false;
+        }
+    }
+
+    private double getCurrentLevel(int pointCount) {
+        return 0.25f*Math.sqrt(pointCount);
     }
 }

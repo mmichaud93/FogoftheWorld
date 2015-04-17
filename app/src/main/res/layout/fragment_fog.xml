@@ -16,10 +16,32 @@
     </FrameLayout>
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/black">
+        <TextView
+            android:id="@+id/level_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="16dp"
+            android:paddingRight="8dp"
+            android:textColor="@color/white"/>
+        <ProgressBar
+            android:id="@+id/level_bar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
+            android:progress="0"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/explore_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:gravity="right"
         android:orientation="horizontal"
         android:padding="16dp">
         <ToggleButton
@@ -30,7 +52,7 @@
             android:padding="8dp"
             android:background="@drawable/standard_toggle_button"
             android:textOff="Explore"
-            android:textOn="Exploring"
+            android:textOn=""
             android:textColor="@color/action_bar_background"
             android:textSize="18sp"/>
     </LinearLayout>

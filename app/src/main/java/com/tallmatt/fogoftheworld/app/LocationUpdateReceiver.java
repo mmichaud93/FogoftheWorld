@@ -1,25 +1,21 @@
 package com.tallmatt.fogoftheworld.app;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.Vibrator;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.tallmatt.fogoftheworld.app.api.CommandCenterController;
+import com.tallmatt.fogoftheworld.app.models.CommandCenterResponseModel;
 import com.tallmatt.fogoftheworld.app.quadtree.QuadTree;
 import com.tallmatt.fogoftheworld.app.storage.LatLngPointsDBHelper;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by michaudm3 on 5/17/2014.
@@ -62,6 +58,19 @@ public class LocationUpdateReceiver extends BroadcastReceiver {
             quadTree.set(points.get(points.size()-1).latLng.latitude, points.get(points.size()-1).latLng.longitude, points.get(points.size()-1));
             mDbHelper.storeSinglePointLatLng(mDbHelper.getWritableDatabase(), points.get(points.size()-1));
             mDbHelper.close();
+
+            CommandCenterController.logLatLng(FogActivity.USERNAME, location.getLatitude(),
+                    location.getLongitude(), System.currentTimeMillis(), new Callback<CommandCenterResponseModel>() {
+                        @Override
+                        public void success(CommandCenterResponseModel commandCenterResponseModel, Response response) {
+
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+
+                        }
+                    });
         }
     }
 }

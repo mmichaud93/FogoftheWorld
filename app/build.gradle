@@ -19,7 +19,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
@@ -32,5 +32,6 @@ dependencies {
     compile 'com.google.android.gms:play-services:4.3.23'
     compile 'com.android.support:appcompat-v7:19.+'
     compile 'com.sothree.slidinguppanel:library:+'
-    compile 'com.squareup.retrofit:retrofit:1.6.+'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
 }
+
